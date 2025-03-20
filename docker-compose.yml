@@ -1,0 +1,65 @@
+version: "3.8"
+
+services:
+  backend:
+    build: ./backend
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=postgresql://postgres:postgres@db:5432/bi_platform
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+    volumes:
+      - ./backend:/app
+    depends_on:
+      - db
+    restart: unless-stopped
+    networks:
+      - bi-network
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "3000:80"
+    volumes:
+      - ./frontend/src:/app/src
+      - ./frontend/public:/app/public
+    depends_on:
+      - backend
+    restart: unless-stopped
+    networks:
+      - bi-network
+
+  data_pipeline:
+    build: ./data_pipeline
+    volumes:
+      - ./data_pipeline:/app
+      - ./data:/app/data
+    environment:
+      - PYTHONUNBUFFERED=1
+    networks:
+      - bi-network
+    deploy:
+      restart_policy:
+        condition: on-failure
+        max_attempts: 3
+
+  db:
+    image: postgres:13
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=bi_platform
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - bi-network
+    restart: unless-stopped
+
+networks:
+  bi-network:
+    driver: bridge
+
+volumes:
+  postgres_data:

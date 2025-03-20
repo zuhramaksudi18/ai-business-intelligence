@@ -1,0 +1,10 @@
+pandas==2.1.0
+numpy==1.25.2
+pyspark==3.4.1
+scrapy==2.10.0
+beautifulsoup4==4.12.2
+requests==2.31.0
+python-dotenv==1.0.0
+schedule==1.2.0
+matplotlib==3.7.2
+seaborn==0.12.2
